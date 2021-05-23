@@ -1,0 +1,37 @@
+{
+  "resources": [
+    {"id":{"name":"obj_game","path":"objects/obj_game/obj_game.yy",},"order":2,},
+    {"id":{"name":"rm_game","path":"rooms/rm_game/rm_game.yy",},"order":1,},
+  ],
+  "Options": [
+    {"name":"Linux","path":"options/linux/options_linux.yy",},
+    {"name":"macOS","path":"options/mac/options_mac.yy",},
+    {"name":"Main","path":"options/main/options_main.yy",},
+    {"name":"Windows","path":"options/windows/options_windows.yy",},
+  ],
+  "isDnDProject": false,
+  "isEcma": false,
+  "tutorialPath": "",
+  "configs": {
+    "name": "Default",
+    "children": [],
+  },
+  "RoomOrderNodes": [
+    {"roomId":{"name":"rm_game","path":"rooms/rm_game/rm_game.yy",},},
+  ],
+  "Folders": [],
+  "AudioGroups": [
+    {"targets":-1,"resourceVersion":"1.3","name":"audiogroup_default","resourceType":"GMAudioGroup",},
+  ],
+  "TextureGroups": [
+    {"isScaled":true,"autocrop":true,"border":2,"mipsToGenerate":0,"groupParent":null,"targets":-1,"resourceVersion":"1.3","name":"Default","resourceType":"GMTextureGroup",},
+  ],
+  "IncludedFiles": [],
+  "MetaData": {
+    "IDEVersion": "2.3.2.560",
+  },
+  "resourceVersion": "1.4",
+  "name": "Zombie World",
+  "tags": [],
+  "resourceType": "GMProject",
+}
