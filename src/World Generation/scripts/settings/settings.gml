@@ -77,8 +77,8 @@
 // Should we allo movement?
 #macro WORLD_ALLOW_MOVEMENT true
 
-// Should we allow placement? (WIP HAVE BUG!!!)
-#macro WORLD_ALLOW_PLACEMENT false
+// Should we allow placement?
+#macro WORLD_ALLOW_PLACEMENT true
 
 // Placement tile index.
 #macro WORLD_PLACEMENT_TILE __TILE.WATER
@@ -91,3 +91,6 @@
 
 // How much worms on one chunk.
 #macro WORLD_GENERATOR_CHUNK_WORMS 4
+
+// Size of the placement.
+#macro WORLD_PLACEMENT_SIZE 3

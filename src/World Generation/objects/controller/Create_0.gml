@@ -77,8 +77,7 @@ function __tile(_type) constructor{
 		// Returning.
 		return self.color;
 	}
-	
-	self.draw = function(_x, _y){ // Function that draws tile.
+		self.draw = function(_x, _y){ // Function that draws tile.
 		// @function draw(_x, _y)
 		// @description Function that draws tile.
 		
@@ -462,18 +461,43 @@ function __world_update_placement(){ // Function that updates placement.
 		var _x = mouse_x div WORLD_TILE_SIZE + __world_chunk_x;
 		var _y = mouse_y div WORLD_TILE_SIZE + __world_chunk_y;
 		
-		// Getting tile.
-		var _tile = __get_tile(_x, _y);
+		// Tiles for placement.
+		var _tiles = [];
 		
-		// Setting new type.
-		_tile.set_type(WORLD_PLACEMENT_TILE);
+		// Getting tile array.
+		for(var _index = 0; _index < sqr(WORLD_PLACEMENT_SIZE); _index ++){
+			// Iterating over placement size (SIZE ** SIZE)
+			
+			// Getting position.
+			var _tx = _x + _index mod WORLD_PLACEMENT_SIZE - floor(WORLD_PLACEMENT_SIZE / 2);
+			var _ty = _y + _index div WORLD_PLACEMENT_SIZE - floor(WORLD_PLACEMENT_SIZE / 2);
+			
+			// Passing if overworld.
+			if _tx < 0 or _tx > WORLD_WIDTH or _ty < 0 or _ty > WORLD_HEIGHT continue;
+			
+			// Adding to array.
+			array_push(_tiles, __get_tile(_tx, _ty));
+		}
+		
+		for (var _tile_index = 0; _tile_index < array_length(_tiles); _tile_index++){
+			// For all tiles.
+			
+			// Get tile.
+			var _tile = _tiles[_tile_index];
+			
+			// Setting new type.
+			_tile.set_type(WORLD_PLACEMENT_TILE);
+		
+			// Passing if overworld.
+			if _x < 1 or _x > WORLD_WIDTH - 1 or _y < 1 or _y > WORLD_HEIGHT - 1 continue;
+			
+			// Mixing. (WARNING THERE IS A BUG WITH OVERFLOW)!
+			_tile.mix(__get_tile(_x - 1, _y), __get_tile(_x + 1, _y), __get_tile(_x, _y + 1), __get_tile(_x, _y - 1));
+		}
 		
 		// Forcing to redraw.
 		__world_force_redraw_tiles = true;
 		__world_force_redraw_light = true;
-		
-		// Mixing. (WARNING THERE IS A BUG WITH OVERFLOW)!
-		_tile.mix(__get_tile(_x - 1, _y), __get_tile(_x + 1, _y), __get_tile(_x, _y + 1), __get_tile(_x, _y - 1));
 	}
 }
 
