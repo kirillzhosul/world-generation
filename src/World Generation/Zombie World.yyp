@@ -1,7 +1,8 @@
 {
   "resources": [
-    {"id":{"name":"obj_game","path":"objects/obj_game/obj_game.yy",},"order":2,},
-    {"id":{"name":"rm_game","path":"rooms/rm_game/rm_game.yy",},"order":1,},
+    {"id":{"name":"world","path":"rooms/world/world.yy",},"order":1,},
+    {"id":{"name":"settings","path":"scripts/settings/settings.yy",},"order":2,},
+    {"id":{"name":"controller","path":"objects/controller/controller.yy",},"order":0,},
   ],
   "Options": [
     {"name":"Linux","path":"options/linux/options_linux.yy",},
@@ -17,7 +18,7 @@
     "children": [],
   },
   "RoomOrderNodes": [
-    {"roomId":{"name":"rm_game","path":"rooms/rm_game/rm_game.yy",},},
+    {"roomId":{"name":"world","path":"rooms/world/world.yy",},},
   ],
   "Folders": [],
   "AudioGroups": [
