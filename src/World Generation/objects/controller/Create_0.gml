@@ -77,7 +77,21 @@ function __tile(_type) constructor{
 		// Returning.
 		return self.color;
 	}
-		self.draw = function(_x, _y){ // Function that draws tile.
+	
+	self.set_city = function(_city){
+		variable_struct_set(self, "CITY", _city);
+	}
+	
+	self.is_city = function(){
+		return variable_struct_exists(self, "CITY");
+	}
+	
+	self.get_city = function(){
+		return variable_struct_get(self, "CITY")
+	}
+	
+	
+	self.draw = function(_x, _y){ // Function that draws tile.
 		// @function draw(_x, _y)
 		// @description Function that draws tile.
 		
@@ -171,6 +185,19 @@ function __city() constructor{
 		array_push(self.tiles, [_x, _y]);
 	}
 	
+	self.remove_tile = function(_x, _y){
+		var _founded = undefined;
+		for (var _tile_index = 0; _tile_index < array_length(self.tiles); _tile_index++){
+			var _position = self.tiles[_tile_index];
+			if _position[0] == _x and _position[1] == _y{
+				_founded = _tile_index;
+			}
+		}
+		if not is_undefined(_founded){
+			array_delete(self.tiles, _founded, 1);
+		}
+	}
+	
 	self.get_edges = function(){ // Function that returns edges array.
 		// @function get_edges()
 		// @description Function that returns edges array.
@@ -182,6 +209,12 @@ function __city() constructor{
 	self.calculate_edges = function(){ // Function that calculates edges positions.
 		// @function calculate_edges()
 		// @description Function that calculates edges positions.
+		
+		if is_undefined(self.tiles) return;
+		
+		var _pos = self.tiles[0]; 
+		var _x = _pos[0],  _y = _pos[1];
+		self.edges[0] = _x; self.edges[2] = _x; self.edges[1] = _y; self.edges[3] = _y;
 		
 		for (var _position = 0; _position < array_length(self.tiles); _position++){
 			// Iterating over all positions.
@@ -199,16 +232,13 @@ function __city() constructor{
 		// Updadting right bottom edge for fix.
 		self.edges[2] += WORLD_TILE_SIZE;
 		self.edges[3] += WORLD_TILE_SIZE;
-		
-		// Deleting all tiles.
-		self.tiles = undefined;
 	}
 	
 	// City tiles.
 	self.tiles = undefined;
 	
 	// Edges of the city.
-	self.edges = [];
+	self.edges = [0, 0, 0, 0];
 	
 	// Name of the city.
 	self.name = array_get(WORLD_CITIES_NAMES, irandom_range(0, array_length(WORLD_CITIES_NAMES) - 1));
@@ -475,8 +505,18 @@ function __world_update_placement(){ // Function that updates placement.
 			// Passing if overworld.
 			if _tx < 0 or _tx > WORLD_WIDTH or _ty < 0 or _ty > WORLD_HEIGHT continue;
 			
+			// Getting tile.
+			var _tile = __get_tile(_tx, _ty);
+			
+			
+			if _tile.is_city(){
+				var _city = _tile.get_city();
+				_city.remove_tile(__tile_world_pos_to_screen_x(_tx), __tile_world_pos_to_screen_y(_ty));
+				_city.calculate_edges();
+			}
+			
 			// Adding to array.
-			array_push(_tiles, __get_tile(_tx, _ty));
+			array_push(_tiles, _tile);
 		}
 		
 		for (var _tile_index = 0; _tile_index < array_length(_tiles); _tile_index++){
@@ -491,7 +531,7 @@ function __world_update_placement(){ // Function that updates placement.
 			// Passing if overworld.
 			if _x < 1 or _x > WORLD_WIDTH - 1 or _y < 1 or _y > WORLD_HEIGHT - 1 continue;
 			
-			// Mixing. (WARNING THERE IS A BUG WITH OVERFLOW)!
+			// Mixing.
 			_tile.mix(__get_tile(_x - 1, _y), __get_tile(_x + 1, _y), __get_tile(_x, _y + 1), __get_tile(_x, _y - 1));
 		}
 		
@@ -590,10 +630,15 @@ function __generator_generate_worm(_fill, _size, _x, _y, _nooverflow){ // Functi
 			// Setting tile.
 			_tile.set_type(_fill); 
 			
-			// Adding tile to the city if needed.
-			if not is_undefined(_city) _city.add_tile(__tile_world_pos_to_screen_x(_x), __tile_world_pos_to_screen_y(_y));
+			if not is_undefined(_city){
+				// Adding tile to the city if needed.
+				_city.add_tile(__tile_world_pos_to_screen_x(_x), __tile_world_pos_to_screen_y(_y));
+				
+				// Marking tile as city.
+				_tile.set_city(_city);
+			}
 		}
-		
+
 		// Moving.
 		_x += irandom_range(-1, 1);
 		_y += irandom_range(-1, 1);

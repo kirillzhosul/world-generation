@@ -1,8 +1,8 @@
 {
   "resources": [
-    {"id":{"name":"world","path":"rooms/world/world.yy",},"order":1,},
-    {"id":{"name":"settings","path":"scripts/settings/settings.yy",},"order":2,},
-    {"id":{"name":"controller","path":"objects/controller/controller.yy",},"order":0,},
+    {"id":{"name":"world","path":"rooms/world/world.yy",},"order":2,},
+    {"id":{"name":"settings","path":"scripts/settings/settings.yy",},"order":0,},
+    {"id":{"name":"controller","path":"objects/controller/controller.yy",},"order":1,},
   ],
   "Options": [
     {"name":"Linux","path":"options/linux/options_linux.yy",},
