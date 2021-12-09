@@ -1,8 +1,10 @@
 {
   "resources": [
-    {"id":{"name":"world","path":"rooms/world/world.yy",},"order":2,},
+    {"id":{"name":"tile_type","path":"scripts/tile_type/tile_type.yy",},"order":0,},
+    {"id":{"name":"tile_structure","path":"scripts/tile_structure/tile_structure.yy",},"order":1,},
+    {"id":{"name":"rm_world","path":"rooms/rm_world/rm_world.yy",},"order":0,},
     {"id":{"name":"settings","path":"scripts/settings/settings.yy",},"order":0,},
-    {"id":{"name":"controller","path":"objects/controller/controller.yy",},"order":1,},
+    {"id":{"name":"obj_controller","path":"objects/obj_controller/obj_controller.yy",},"order":0,},
   ],
   "Options": [
     {"name":"Linux","path":"options/linux/options_linux.yy",},
@@ -19,9 +21,15 @@
     "children": [],
   },
   "RoomOrderNodes": [
-    {"roomId":{"name":"world","path":"rooms/world/world.yy",},},
+    {"roomId":{"name":"rm_world","path":"rooms/rm_world/rm_world.yy",},},
   ],
-  "Folders": [],
+  "Folders": [
+    {"folderPath":"folders/Scripts/Settings.yy","order":1,"resourceVersion":"1.0","name":"Settings","tags":[],"resourceType":"GMFolder",},
+    {"folderPath":"folders/Room.yy","order":0,"resourceVersion":"1.0","name":"Room","tags":[],"resourceType":"GMFolder",},
+    {"folderPath":"folders/Controller.yy","order":1,"resourceVersion":"1.0","name":"Controller","tags":[],"resourceType":"GMFolder",},
+    {"folderPath":"folders/Scripts.yy","order":2,"resourceVersion":"1.0","name":"Scripts","tags":[],"resourceType":"GMFolder",},
+    {"folderPath":"folders/Scripts/Tile.yy","order":0,"resourceVersion":"1.0","name":"Tile","tags":[],"resourceType":"GMFolder",},
+  ],
   "AudioGroups": [
     {"targets":-1,"resourceVersion":"1.3","name":"audiogroup_default","resourceType":"GMAudioGroup",},
   ],

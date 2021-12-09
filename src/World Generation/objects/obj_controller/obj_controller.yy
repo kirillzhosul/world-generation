@@ -25,11 +25,11 @@
   "properties": [],
   "overriddenProperties": [],
   "parent": {
-    "name": "World Generation",
-    "path": "World Generation.yyp",
+    "name": "Controller",
+    "path": "folders/Controller.yy",
   },
   "resourceVersion": "1.0",
-  "name": "controller",
+  "name": "obj_controller",
   "tags": [],
   "resourceType": "GMObject",
 }

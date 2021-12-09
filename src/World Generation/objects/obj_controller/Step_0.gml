@@ -1,5 +1,5 @@
 /// @description Updating world.
 /// @author Kirill Zhosul (@kirillzhosul)
 
-// Updating time.
-__world_update();
+// Update world state.
+world_update();
