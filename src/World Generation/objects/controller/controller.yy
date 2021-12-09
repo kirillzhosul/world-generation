@@ -25,8 +25,8 @@
   "properties": [],
   "overriddenProperties": [],
   "parent": {
-    "name": "Zombie World",
-    "path": "Zombie World.yyp",
+    "name": "World Generation",
+    "path": "World Generation.yyp",
   },
   "resourceVersion": "1.0",
   "name": "controller",
