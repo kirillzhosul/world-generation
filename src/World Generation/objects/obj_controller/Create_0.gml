@@ -29,144 +29,17 @@ __world_force_redraw_light = true;
 // World cities data.
 __world_cities = [];
 
+// How much frames left to call cities grow update.
+//__world_cities_grow_update_time_left = WORLD_CITIES_GROW_SPEED;
+
 // Array of the world.
 __world = [];
 
 #endregion
 
-#region Tile struct.
-
-// Tile types.
-enum __TILE{ FOREST, CITY, WATER, DESERT }
-
-function __tile(_type) constructor{
-	// Tile struct.
-	
-	// Set type function.
-	self.set_type = function(_type){ // Function that sets type.
-		// @function set_type(_type)
-		// @description Function that sets type.
-		// @param {TILE} _type Type to set.
-		
-		// Setting.
-		self.type = _type;
-		
-		// Updating color.
-		self.__update_color();
-	}
-
-	// Get type function.
-	self.get_type = function(){ // Function that gets type.
-		// @function get_type()
-		// @description Function that gets type.
-		// @returns {TILE} Type.
-		
-		// Returning.
-		return self.type;
-	}
-	
-	// Get color function.
-	self.get_color = function(){ // Function that gets color.
-		// @function get_color()
-		// @description Function that gets color.
-		// @returns {COLOR} Color.
-		
-		// Color optimization.
-		if WORLD_TILE_COLOR_OPTIMIZATION{ return array_get(WORLD_TILE_COLORS, self.type); }
-		
-		// Returning.
-		return self.color;
-	}
-	
-	self.set_city = function(_city){
-		variable_struct_set(self, "CITY", _city);
-	}
-	
-	self.is_city = function(){
-		return variable_struct_exists(self, "CITY");
-	}
-	
-	self.get_city = function(){
-		return variable_struct_get(self, "CITY")
-	}
-	
-	
-	self.draw = function(_x, _y){ // Function that draws tile.
-		// @function draw(_x, _y)
-		// @description Function that draws tile.
-		
-		// Setting color for tile.
-		draw_set_color(self.get_color());
-		
-		// Adding light source if this is city.
-		if self.type == __TILE.CITY and (WORLD_LIGHT_ENABLED and world.__world_force_redraw_tiles){ array_push(world.__world_light_sources, _x, _y); }
-		
-		// Drawing rectangle.
-		draw_rectangle(_x, _y, _x + WORLD_TILE_SIZE, _y + WORLD_TILE_SIZE, false);
-		
-		// Circle filter.
-		if WORLD_TILE_FILTER_CIRCLE draw_circle(_x, _y, WORLD_TILE_FILTER_CIRCLE, false);
-	}
-	
-	// Update color function.
-	self.__update_color = function(){ // Function that updates color.
-		// @function __update_color()
-		// @description Function that updates color.
-		
-		// Returning if color optimization.
-		if WORLD_TILE_COLOR_OPTIMIZATION return;
-		
-		// Default color.
-		var _color = array_get(WORLD_TILE_COLORS, self.type);
-		
-		// Changing color a bit.
-		_color = make_color_hsv(color_get_hue(_color), color_get_saturation(_color), color_get_value(_color) + irandom_range(-6, 6));
-		
-		// Setting color.
-		self.color = _color;
-	}
-	
-	self.mix = function(_left, _right, _down, _up){
-		// @function mix(_left, _right, _down, _up)
-		// @description Function that mixes color with merging colors.
-		
-		// Getting my color.
-		var _color = color_get_hue(self.get_color());
-		
-		// Getting other colors.
-		_left = _left.get_type() != self.type ? color_get_hue(_left.get_color()) : _color;
-		_right = _right.get_type() != self.type ? color_get_hue(_right.get_color()) : _color;
-		_down = _down.get_type() != self.type ? color_get_hue(_down.get_color()) : _color;
-		_up = _up.get_type() != self.type ? color_get_hue(_up.get_color()) : _color;
-		
-		// Getting difference.
-		_left = _left > _color ? _left - _color : _color - _left;
-		_right = _right > _color ? _right - _color : _color - _right;
-		_down = _down > _color ? _down - _color : _color - _down;
-		_up = _up > _color ? _up - _color : _color - _up;
-		
-		// Getting selected color.
-		var _selected = floor(max(_left, _right, _down, _up) / WORLD_COLOR_MIXING_VALUE);
-		
-		// Implementing color.
-		self.color = make_color_hsv(color_get_hue(self.color) + _selected, color_get_saturation(self.color) + _selected, color_get_value(self.color) + _selected);
-	}
-	
-	// Default color.
-	if not WORLD_TILE_COLOR_OPTIMIZATION self.color = 0;
-	
-	// Setting type from constructor.
-	self.type = _type;
-	
-	// Calling update color function.
-	self.__update_color();
-}
-
-#endregion
-
 #region City struct.
 
-function __city() constructor{
+function sCity() constructor{
 	// City structure.
 	
 	self.add_tile = function(_x, _y){ // Function that adds tile to the city.
@@ -185,17 +58,36 @@ function __city() constructor{
 		array_push(self.tiles, [_x, _y]);
 	}
 	
-	self.remove_tile = function(_x, _y){
-		var _founded = undefined;
-		for (var _tile_index = 0; _tile_index < array_length(self.tiles); _tile_index++){
+	self.remove_tile = function(_x, _y, _recalculate_edges, _allow_multi){
+		// @function remove_tile(_x, _y)
+		// @description Function that removes tile from the city.
+		// @param _x X of the tile.
+		// @param _y Y of the tile.
+		// @param _recalculate_edges Should we recalculate edges after this?
+		// @param _allow_multi Allow removing more than one tile?
+		
+		// Getting tiles count.
+		var _tiles_count = array_length(self.tiles);
+		
+		for (var _tile_index = 0; _tile_index < _tiles_count; _tile_index++){
+			// Iterating over all tiles.
+			
+			// Getting position.
 			var _position = self.tiles[_tile_index];
+			
 			if _position[0] == _x and _position[1] == _y{
-				_founded = _tile_index;
+				// If correct position.
+				
+				// Deleting tile.
+				array_delete(self.tiles, _tile_index, 1);
+				
+				// Returning if we dont allow to remove more than 1 tile.
+				if not _allow_multi return;
 			}
 		}
-		if not is_undefined(_founded){
-			array_delete(self.tiles, _founded, 1);
-		}
+		
+		// Recalculating edges if we want.
+		if _recalculate_edges self.calculate_edges();
 	}
 	
 	self.get_edges = function(){ // Function that returns edges array.
@@ -206,21 +98,147 @@ function __city() constructor{
 		return self.edges;
 	}
 	
+	self.get_size = function(){
+		// @function get_size()
+		// @description Function that returns city size.
+		// @returns {real} Size.
+		
+		// If we not set any tiles for now - return 0.
+		if is_undefined(self.tiles) return 0;
+		
+		// Returning.
+		return array_length(self.get_edges());
+	}
+	
+	/*
+	self.process_tile_build = function(_x, _y){
+		// @function process_tile_build(_x, y)
+		// @description Function that process tile building at the new tiles.
+		
+		// Getting tile.
+		var _tile = obj_controller.__get_tile(_x, _y);
+		
+		if not (_tile.is_city() and _tile.get_city() == self){
+			// If tile is not city or not our city.
+			
+			// Returning.
+			return;
+		}
+		
+		// Getting tile type.
+		var _type = _tile.get_type();
+		
+		// Setting new type (CITY if default and CITY_ON_WATER if on water).
+		_tile.set_type(_type == eTILE_TYPE.WATER ? eTILE_TYPE.CITY_ON_WATER : eTILE_TYPE.CITY);
+	}
+	self.process_growing = function(){
+		// @function process_growing()
+		// @description Function that processes growing of the city.
+		
+		// Returning if not allowed to grow.
+		if not WORLD_CITIES_GROWING_ALLOWED return;
+		
+		// Getting growing sides x.
+		var _grow_side_x = choose(-1, 0, 1);
+		var _grow_side_y = choose(-1, 0, 1);
+		
+		// Getting tiles count.
+		var _tiles_count = array_length(self.tiles);
+		
+		// ASAP REWRITE TO INTERNAL GROW SIDE CHECK.
+		// How much tiles we grow.
+		var _grow_tiles = 0;
+		
+		
+		for (var _position = 0; _position < _tiles_count; _position++){
+			// Iterating over all positions.
+			
+			// Getting position.
+			var _pos = self.tiles[_position]
+			var _x = _pos[0];
+			var _y = _pos[1];
+			
+			if (_y == self.edges[1] or _y == self.edges[3]){
+				// If we on the same line (Y).
+				if (_x >= self.edges[0] and _x < self.edges[3]){
+					// If we on the same line (X).
+					
+					if choose(true, false, false, false){
+						// If 1/4 chance (25%) - place there our city.
+						
+						// Getting new positions.
+						var _new_x = _x + _grow_side_x;
+						var _new_y = _y + _grow_side_y;
+						
+						// Adding tile.
+						var _tile = controller.__get_tile(_new_x, _new_y);
+						if not _tile.is_city(){
+							// If this is correct tile (not already city..
+							
+							// Adding.
+							self.add_tile(_new_x, _new_y);
+						}else{
+							// If incorrect tile.
+							
+							// Continue.
+							continue;
+						}
+						
+						// Processing building of the tile.
+						self.process_tile_build(_new_x, _new_y);
+						
+						// Recalculating edges.
+						self.calculate_edges();
+						
+						if _grow_tiles + 1 < WORLD_CITIES_GROWING_SIZE{
+							// If we grow more.
+							
+							// Getting new growing sides x.
+							var _grow_side_x = choose(-1, 0, 1);
+							var _grow_side_y = choose(-1, 0, 1);
+							
+							// Increasing growing amount.
+							_grow_tiles ++;
+						}else{
+							// If we grow need size.
+							
+							// Returning.
+							return;
+						}
+					}
+				}
+			}
+		}
+	}
+	*/
 	self.calculate_edges = function(){ // Function that calculates edges positions.
 		// @function calculate_edges()
 		// @description Function that calculates edges positions.
 		
+		// If we not set any tiles for now - return.
 		if is_undefined(self.tiles) return;
 		
+		// Gettin position of the first tile.
 		var _pos = self.tiles[0]; 
-		var _x = _pos[0],  _y = _pos[1];
-		self.edges[0] = _x; self.edges[2] = _x; self.edges[1] = _y; self.edges[3] = _y;
+		var _x = _pos[0];
+		var _y = _pos[1];
 		
-		for (var _position = 0; _position < array_length(self.tiles); _position++){
+		// Setting default edges.
+		self.edges[0] = _x; 
+		self.edges[2] = _x; 
+		self.edges[1] = _y; 
+		self.edges[3] = _y;
+		
+		// Getting tiles count.
+		var _tiles_count = array_length(self.tiles);
+		
+		for (var _position = 0; _position < _tiles_count; _position++){
 			// Iterating over all positions.
 			
 			// Getting position.
-			var _pos = self.tiles[_position],  _x = _pos[0],  _y = _pos[1];
+			var _pos = self.tiles[_position]
+			var _x = _pos[0];
+			var _y = _pos[1];
 			
 			// Updating edge position if needed.
 			if _x < self.edges[0]{ self.edges[0] = _x; }
@@ -230,10 +248,26 @@ function __city() constructor{
 		}
 		
 		// Updadting right bottom edge for fix.
-		self.edges[2] += WORLD_TILE_SIZE;
-		self.edges[3] += WORLD_TILE_SIZE;
+		//self.edges[2] += WORLD_TILE_SIZE;
+		//self.edges[3] += WORLD_TILE_SIZE;
 	}
 	
+	self.get_center_x = function(){
+		// @function get_center_x()
+		// @description Function that returns x of the city center.
+		
+		// Returning x.
+		return self.edges[0] + floor((self.edges[2] - self.edges[0]) / 2)
+	}
+	
+	self.get_center_y = function(){
+		// @function get_center_y()
+		// @description Function that returns y of the city center.
+		
+		// Returning y.
+		return self.edges[1] + floor((self.edges[3] - self.edges[1]) / 2)
+	}
+		
 	// City tiles.
 	self.tiles = undefined;
 	
@@ -288,7 +322,7 @@ function __set_tile(_x, _y, _tile){ // Function that sets tile to the world arra
 
 #region Drawing.
 
-function __world_draw(){ // Function that draws world.
+function world_draw(){ // Function that draws world.
 	// @functon __world_draw()
 	// @description Function that draws world.
 
@@ -317,10 +351,10 @@ function __world_draw_cities(){ // Function that draws cities.
 		
 		// Getting edges.
 		var _edges = _city.get_edges(); 
-		_edges[0] -= __world_chunk_x * WORLD_TILE_SIZE;
-		_edges[1] -= __world_chunk_y * WORLD_TILE_SIZE;
-		_edges[2] -= __world_chunk_x * WORLD_TILE_SIZE;
-		_edges[3] -= __world_chunk_y * WORLD_TILE_SIZE;
+		_edges[0] = (_edges[0] - __world_chunk_x) * WORLD_TILE_SIZE;
+		_edges[1] = (_edges[1] - __world_chunk_y) * WORLD_TILE_SIZE;
+		_edges[2] = (_edges[2] - __world_chunk_x) * WORLD_TILE_SIZE;
+		_edges[3] = (_edges[3] - __world_chunk_y) * WORLD_TILE_SIZE;
 		
 		if point_in_rectangle(mouse_x, mouse_y, _edges[0], _edges[1], _edges[2], _edges[3]){
 			// If hovered.
@@ -338,7 +372,10 @@ function __world_draw_cities(){ // Function that draws cities.
 			
 			// Drawing city name.
 			draw_set_alpha(1);
-			draw_text(mouse_x + 5, mouse_y - 10, _city.name);
+			
+			// This code implements drwaing of the city name in the mouse position.
+			draw_text(mouse_x + 5, mouse_y - 10, "City.\bName: " + _city.name + "\nSize (Tiles): " + string(_city.get_size()));
+			// This code implements drawing of the city name in the center of the city.
 			//draw_text(_edges[0] + floor((_edges[2] - _edges[0]) / 2), _edges[1] + floor((_edges[3] - _edges[1]) / 2), _city.name);
 		}
 	}
@@ -405,7 +442,6 @@ function __world_draw_light(){ // Function that draws light.
 	
 	// Disabling light update.
 	if not WORLD_FORCE_REDRAW_LIGHT __world_force_redraw_light = false; 
-	
 }
 
 function __world_draw_tiles(){ // Function that draw tiles.
@@ -428,8 +464,18 @@ function __world_draw_tiles(){ // Function that draw tiles.
 			for(var _y = __world_chunk_y; _y < __world_chunk_y + CHUNK_HEIGHT; _y ++){
 				// Iterating over all tiles in the screen chunk.
 			
+				var tile = __get_tile(_x,_y);
 				// Drawing tile.
-				__get_tile(_x,_y).draw(__tile_world_pos_to_screen_x(_x), __tile_world_pos_to_screen_y(_y));
+				tile.draw(__tile_world_pos_to_screen_x(_x), __tile_world_pos_to_screen_y(_y));
+				
+						
+				if tile.type == eTILE_TYPE.CITY and (WORLD_LIGHT_ENABLED and __world_force_redraw_tiles){ 
+					// If this is city, light is enabled, and we should be forced to draw tiles.
+					
+					// Add light source.
+					array_push(__world_light_sources, _x, _y); 
+				}
+		
 			}
 		
 		// Resetting surface target.
@@ -456,7 +502,7 @@ function __world_update_time(){ // Function that updates time.
 	
 	// Changing direction if reached max value.
 	if __world_lightness == WORLD_LIGHTHNESS_MAXIMAL or __world_lightness == -WORLD_LIGHTHNESS_MAXIMAL{
-		__world_lightness_change = -__world_lightness_change;
+		__world_lightness_change = -(__world_lightness_change);
 	}
 }
 
@@ -507,12 +553,15 @@ function __world_update_placement(){ // Function that updates placement.
 			
 			// Getting tile.
 			var _tile = __get_tile(_tx, _ty);
-			
-			
-			if _tile.is_city(){
-				var _city = _tile.get_city();
-				_city.remove_tile(__tile_world_pos_to_screen_x(_tx), __tile_world_pos_to_screen_y(_ty));
-				_city.calculate_edges();
+				
+			// Try get city
+			var _city = _tile.get_city();
+				
+			if not is_undefined(_city){
+				// If there is an city in the placement.
+
+				// Removing this tile from the city structure.
+				_city.remove_tile(_tx, _ty, true, false);
 			}
 			
 			// Adding to array.
@@ -532,7 +581,7 @@ function __world_update_placement(){ // Function that updates placement.
 			if _x < 1 or _x > WORLD_WIDTH - 1 or _y < 1 or _y > WORLD_HEIGHT - 1 continue;
 			
 			// Mixing.
-			_tile.mix(__get_tile(_x - 1, _y), __get_tile(_x + 1, _y), __get_tile(_x, _y + 1), __get_tile(_x, _y - 1));
+			_tile.mix_color(__get_tile(_x - 1, _y), __get_tile(_x + 1, _y), __get_tile(_x, _y + 1), __get_tile(_x, _y - 1));
 		}
 		
 		// Forcing to redraw.
@@ -541,7 +590,7 @@ function __world_update_placement(){ // Function that updates placement.
 	}
 }
 
-function __world_update(){ // Function that updates world.
+function world_update(){ // Function that updates world.
 	// @function __world_update()
 	// @description Function that updates world.
 	
@@ -549,12 +598,41 @@ function __world_update(){ // Function that updates world.
 	if WORLD_UPDATE_TIME __world_update_time();
 	
 	// Updating movement.
-	if WORLD_ALLOW_MOVEMENT __world_update_movement()
+	if WORLD_ALLOW_MOVEMENT __world_update_movement();
 	
 	// Updating placement.
 	if WORLD_ALLOW_PLACEMENT __world_update_placement();
+	
+	// Updating cities growing.
+	//if WORLD_CITIES_GROW_SPEED __world_update_cities_grow();
 }
 
+/*
+function __world_update_cities_grow(){
+	// @function __world_update_cities_grow()
+	// @description Function that updates cities grow.
+	
+
+	if __world_cities_grow_update_time_left == 0{
+		// If update time.
+		
+		// Resetting next update time.
+		//__world_cities_grow_update_time_left = WORLD_CITIES_GROW_SPEED;
+		
+		for(var _city_index=0; _city_index < array_length(__world_cities);_city_index++){
+			var _city = array_get(__world_cities, _city_index)
+			_city.process_growing();
+		}
+	}else{
+		// If not update time.
+		
+		// Decreasing update left time.
+		__world_cities_grow_update_time_left --;
+	}
+
+}
+*/
+	
 #endregion
 
 #region Generation.
@@ -572,7 +650,7 @@ function __world_generate(){ // Function that generates world.
 			// Iteraing over all __WORLD_SIZE.
 			
 			// Setting tile as forest.
-			__set_tile(_x, _y, new __tile(WORLD_GENERATOR_DEFAULT_TILE));
+			__set_tile(_x, _y, new sTile(WORLD_GENERATOR_DEFAULT_TILE));
 		};
 		
 	// Worms.
@@ -581,17 +659,16 @@ function __world_generate(){ // Function that generates world.
 			// Iterating over chunk.
 			
 			// Generating deserts and oceans.
-			__generator_generate_worm(__TILE.DESERT, irandom_range(50, 100), irandom_range(_chunk_x, _chunk_x + WORLD_GENERATOR_CHUNK_SIZE), irandom_range(_chunk_y, _chunk_y + WORLD_GENERATOR_CHUNK_SIZE), true); 
-			__generator_generate_worm(__TILE.WATER, irandom_range(50, 100), irandom_range(_chunk_x, _chunk_x + WORLD_GENERATOR_CHUNK_SIZE), irandom_range(_chunk_y, _chunk_y + WORLD_GENERATOR_CHUNK_SIZE), true); 
+			__generator_generate_worm(eTILE_TYPE.DESERT, irandom_range(50, 100), irandom_range(_chunk_x, _chunk_x + WORLD_GENERATOR_CHUNK_SIZE), irandom_range(_chunk_y, _chunk_y + WORLD_GENERATOR_CHUNK_SIZE), true); 
+			__generator_generate_worm(eTILE_TYPE.WATER, irandom_range(50, 100), irandom_range(_chunk_x, _chunk_x + WORLD_GENERATOR_CHUNK_SIZE), irandom_range(_chunk_y, _chunk_y + WORLD_GENERATOR_CHUNK_SIZE), true); 
 			
 			// Generating worms (Cities, water)
 			repeat(WORLD_GENERATOR_CHUNK_WORMS){ 
-				__generator_generate_worm(__TILE.WATER, irandom_range(3, 10), irandom_range(_chunk_x, _chunk_x + WORLD_GENERATOR_CHUNK_SIZE), irandom_range(_chunk_y, _chunk_y + WORLD_GENERATOR_CHUNK_SIZE), false); 
-				__generator_generate_worm(__TILE.CITY, irandom_range(10, 15), irandom_range(_chunk_x, _chunk_x + WORLD_GENERATOR_CHUNK_SIZE), irandom_range(_chunk_y, _chunk_y + WORLD_GENERATOR_CHUNK_SIZE), true); 
+				__generator_generate_worm(eTILE_TYPE.WATER, irandom_range(3, 10), irandom_range(_chunk_x, _chunk_x + WORLD_GENERATOR_CHUNK_SIZE), irandom_range(_chunk_y, _chunk_y + WORLD_GENERATOR_CHUNK_SIZE), false); 
+				__generator_generate_worm(eTILE_TYPE.CITY, irandom_range(10, 15), irandom_range(_chunk_x, _chunk_x + WORLD_GENERATOR_CHUNK_SIZE), irandom_range(_chunk_y, _chunk_y + WORLD_GENERATOR_CHUNK_SIZE), true); 
 				
 			}
 		}
-		
 	
 	// Returning if dont need to mix.
 	if WORLD_TILE_COLOR_OPTIMIZATION or not WORLD_COLOR_MIX return;
@@ -604,7 +681,7 @@ function __world_generate(){ // Function that generates world.
 			if (_x < 2 or _x > WORLD_WIDTH - 2 or _y < 2 or _y > WORLD_HEIGHT - 2) continue;
 			
 			// Mixing tile.
-			__get_tile(_x, _y).mix(__get_tile(_x - 1, _y), __get_tile(_x + 1, _y), __get_tile(_x, _y + 1), __get_tile(_x, _y - 1));
+			__get_tile(_x, _y).mix_color(__get_tile(_x - 1, _y), __get_tile(_x + 1, _y), __get_tile(_x, _y + 1), __get_tile(_x, _y - 1));
 		};
 }
 
@@ -613,7 +690,7 @@ function __generator_generate_worm(_fill, _size, _x, _y, _nooverflow){ // Functi
 	// @description Function that generates random worm with given tile size and position.
 	
 	// Getting city struct if needed.
-	var _city = (_fill == __TILE.CITY and WORLD_CITIES_ENABLED) ? new __city() : undefined;
+	var _city = (_fill == eTILE_TYPE.CITY and WORLD_CITIES_ENABLED) ? new sCity() : undefined;
 	
 	for (var _repeat = 0; _repeat < _size; _repeat++){
 		// Loop for size.
@@ -631,8 +708,10 @@ function __generator_generate_worm(_fill, _size, _x, _y, _nooverflow){ // Functi
 			_tile.set_type(_fill); 
 			
 			if not is_undefined(_city){
+				// If any city connected.
+				
 				// Adding tile to the city if needed.
-				_city.add_tile(__tile_world_pos_to_screen_x(_x), __tile_world_pos_to_screen_y(_y));
+				_city.add_tile(_x, _y);
 				
 				// Marking tile as city.
 				_tile.set_city(_city);

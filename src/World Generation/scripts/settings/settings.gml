@@ -81,10 +81,10 @@
 #macro WORLD_ALLOW_PLACEMENT true
 
 // Placement tile index.
-#macro WORLD_PLACEMENT_TILE __TILE.WATER
+#macro WORLD_PLACEMENT_TILE eTILE_TYPE.WATER
 
 // Default tile for the generator.
-#macro WORLD_GENERATOR_DEFAULT_TILE __TILE.FOREST
+#macro WORLD_GENERATOR_DEFAULT_TILE eTILE_TYPE.FOREST
 
 // Size of the one chunk for generation.
 #macro WORLD_GENERATOR_CHUNK_SIZE 32
