@@ -1,6 +1,7 @@
 {
   "resources": [
     {"id":{"name":"tile_type","path":"scripts/tile_type/tile_type.yy",},"order":0,},
+    {"id":{"name":"city_structure","path":"scripts/city_structure/city_structure.yy",},"order":0,},
     {"id":{"name":"tile_structure","path":"scripts/tile_structure/tile_structure.yy",},"order":1,},
     {"id":{"name":"rm_world","path":"rooms/rm_world/rm_world.yy",},"order":0,},
     {"id":{"name":"settings","path":"scripts/settings/settings.yy",},"order":0,},
@@ -29,6 +30,7 @@
     {"folderPath":"folders/Controller.yy","order":1,"resourceVersion":"1.0","name":"Controller","tags":[],"resourceType":"GMFolder",},
     {"folderPath":"folders/Scripts.yy","order":2,"resourceVersion":"1.0","name":"Scripts","tags":[],"resourceType":"GMFolder",},
     {"folderPath":"folders/Scripts/Tile.yy","order":0,"resourceVersion":"1.0","name":"Tile","tags":[],"resourceType":"GMFolder",},
+    {"folderPath":"folders/Scripts/City.yy","order":2,"resourceVersion":"1.0","name":"City","tags":[],"resourceType":"GMFolder",},
   ],
   "AudioGroups": [
     {"targets":-1,"resourceVersion":"1.3","name":"audiogroup_default","resourceType":"GMAudioGroup",},
