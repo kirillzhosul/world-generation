@@ -1,158 +1,10 @@
 /// @description Initialising world.
 /// @author Kirill Zhosul (@kirillzhosul)
 
-#region Variables.
-
-// Flags for redrawing.
-should_redraw_tiles = true; // If true, this is will redraw tiles on next draw call (And set back to false).
-should_redraw_light = true; // If true, this is will redraw light on next draw call (And set back to false).
-
-// How much light in the world now.
-light_level = WORLD_LIGHTHNESS_MAXIMAL;
-
-// By how light_level changes when updating time.
-light_update_direction = -1;
-
-// Sources of the light.
-light_sources = []
-
-// Surfaces of the world.
-surface_tiles = surface_create(SCREEN_WIDTH, SCREEN_HEIGHT); // Surface with tiles.
-surface_light = surface_create(SCREEN_WIDTH, SCREEN_HEIGHT); // Surface with light.
-
-// Position of the world chunk to draw.
-chunk_x = 0;
-chunk_y = 0;
-
-// Arrays of the world.
-cities = []; // Array of world cities.
-tiles = []; // Array of the world tiles.
-
-#endregion
-
-#region City struct.
-
-function sCity() constructor{
-	// City structure.
-	
-	self.add_tile = function(add_x, add_y){
-		// @description Function that adds tile to the city.
-		
-		if is_undefined(self.tiles){
-			// If not initialised.
-			
-			// Initialising positions.
-			self.edges[0] = add_x; self.edges[2] = add_x; self.edges[1] = add_y; self.edges[3] = add_y;
-			self.tiles = [];
-		}
-		
-		// Adding tile.
-		array_push(self.tiles, [add_x, add_y]);
-	}
-	
-	self.remove_tile = function(remove_x, remove_y, recalculate_edges, allow_multi){
-		// @description Function that removes tile from the city.
-		// @param x X of the tile.
-		// @param y Y of the tile.
-		// @param recalculate_edges Should we recalculate edges after this?
-		// @param allow_multi Allow removing more than one tile?
-		
-		// Getting tiles count.
-		var tiles_count = array_length(self.tiles);
-		
-		for (var tile_index = 0; tile_index < tiles_count; tile_index++){
-			// Iterating over all tiles.
-			
-			// Getting position.
-			var position = self.tiles[tile_index];
-			
-			if position[0] == remove_x and position[1] == remove_y{
-				// If correct position.
-				
-				// Deleting tile.
-				array_delete(self.tiles, tile_index, 1);
-				
-				// Returning if we dont allow to remove more than 1 tile.
-				if not allow_multi return;
-			}
-		}
-		
-		// Recalculating edges if we want.
-		if recalculate_edges self.calculate_edges();
-	}
-	
-	self.get_edges = function(){ // Function that returns edges array.
-		// @function get_edges()
-		// @description Function that returns edges array.
-		
-		// Returning.
-		return self.edges;
-	}
-	
-	self.get_size = function(){
-		// @function get_size()
-		// @description Function that returns city size.
-		// @returns {real} Size.
-		
-		// If we not set any tiles for now - return 0.
-		if is_undefined(self.tiles) return 0;
-		
-		// Returning.
-		return array_length(self.get_edges());
-	}
-	
-	self.calculate_edges = function(){ // Function that calculates edges positions.
-		// @function calculate_edges()
-		// @description Function that calculates edges positions.
-		
-		// If we not set any tiles for now - return.
-		if is_undefined(self.tiles) return;
-		
-		// Gettin position of the first tile.
-		var pos = self.tiles[0]; 
-		var pos_x = pos[0];
-		var pos_y = pos[1];
-		
-		// Setting default edges.
-		self.edges[0] = pos_x; 
-		self.edges[2] = pos_x; 
-		self.edges[1] = pos_y; 
-		self.edges[3] = pos_y;
-		
-		// Getting tiles count.
-		var tiles_count = array_length(self.tiles);
-		
-		for (var position = 0; position < tiles_count; position++){
-			// Iterating over all positions.
-			
-			// Getting position.
-			var pos = self.tiles[position]
-			var pos_x = pos[0];
-			var pos_y = pos[1];
-			
-			// Updating edge position if needed.
-			if pos_x < self.edges[0]{ self.edges[0] = pos_x; }
-			if pos_y < self.edges[1]{ self.edges[1] = pos_y; }
-			if pos_x > self.edges[2]{ self.edges[2] = pos_x; }
-			if pos_y > self.edges[3]{ self.edges[3] = pos_y; }
-		}
-		
-		// Updadting right bottom edge for fix.
-		//self.edges[2] += WORLD_TILE_SIZE;
-		//self.edges[3] += WORLD_TILE_SIZE;
-	}
-
-	// City tiles.
-	self.tiles = undefined;
-	
-	// Edges of the city.
-	self.edges = [0, 0, 0, 0];
-	
-	// Name of the city.
-	self.name = array_get(WORLD_CITIES_NAMES, irandom_range(0, array_length(WORLD_CITIES_NAMES) - 1));
-}
-
-#endregion
+// This is not refactored code.
+// This code should be refactored later,
+// Now there is some things that may be bad / should be reworked / renamed.
+// Sorry for that.
 
 #region Functions.
 
@@ -410,13 +262,13 @@ function world_update_placement(){
 		var square_tile = get_tile(square_x, square_y);
 				
 		// Try get city
-		var square_city = square_tile.get_city();
+		var square_city = square_tile.try_get_city();
 				
 		if not is_undefined(square_city){
 			// If there is an city in the placement.
 
 			// Removing this tile from the city structure.
-			square_city.remove_tile(square_x, square_y, true, false);
+			square_city.remove_tile(square_x, square_y);
 		}
 			
 		// Adding to array.
@@ -574,12 +426,33 @@ function generator_generate_worm(fill_cell_type, size, worm_x, worm_y, no_overfl
 
 #endregion
 
-#region Entry point.
+// Flags for redrawing.
+should_redraw_tiles = true; // If true, this is will redraw tiles on next draw call (And set back to false).
+should_redraw_light = true; // If true, this is will redraw light on next draw call (And set back to false).
+
+// How much light in the world now.
+light_level = WORLD_LIGHTHNESS_MAXIMAL;
+
+// By how light_level changes when updating time.
+light_update_direction = -1;
+
+// Sources of the light.
+light_sources = []
+
+// Surfaces of the world.
+surface_tiles = surface_create(SCREEN_WIDTH, SCREEN_HEIGHT); // Surface with tiles.
+surface_light = surface_create(SCREEN_WIDTH, SCREEN_HEIGHT); // Surface with light.
+
+// Position of the world chunk to draw.
+chunk_x = 0;
+chunk_y = 0;
+
+// Arrays of the world.
+cities = []; // Array of world cities.
+tiles = []; // Array of the world tiles.
 
 // Generating world.
 world_generate();
 
 // Enabling overlay.
 show_debug_overlay(true);
-
-#endregion

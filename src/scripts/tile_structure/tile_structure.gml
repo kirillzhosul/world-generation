@@ -16,7 +16,7 @@ function sTile(type) constructor{
 	// Pass given type to the type.
 	// Type should be in range from 0 to eTILE_TYPE.COUNT
 	// (Actually eTILE_TYPE).
-	self.type = type;
+	self._type = type;
 	// !There is `set_type()` function call below!
 	
 	
@@ -25,7 +25,7 @@ function sTile(type) constructor{
 	// When calling `set_type()`.
 	//  If there is tile memory color opitimization enabled, we don`t initalise color value,
 	//  As this setting should reduce memory usage.
-	if not WORLD_TILE_COLOR_OPTIMIZATION self.color = undefined;
+	if not WORLD_TILE_COLOR_OPTIMIZATION self._color = undefined;
 	
 	
 	// Type getter / setter.
@@ -34,7 +34,7 @@ function sTile(type) constructor{
 		// @param {eTILE_TYPE} type Value to set.
 		
 		// Setting.
-		self.type = type;
+		self._type = type;
 		
 		// Updating state.
 		self._update_color();
@@ -44,7 +44,7 @@ function sTile(type) constructor{
 		// @returns {eTILE_TYPE} Value.
 		
 		// Returning.
-		return self.type;
+		return self._type;
 	}
 	
 	// Color getter.
@@ -57,11 +57,11 @@ function sTile(type) constructor{
 			
 			// Returning not a tile color field value,
 			// Returning color tile colors lookup-table.
-			return array_get(WORLD_TILE_COLORS, self.type);
+			return array_get(WORLD_TILE_COLORS, self._type);
 		}
 		
 		// Returning.
-		return self.color;
+		return self._color;
 	}
 	self.mix_color = function(l, r, d, u){
 		// @description Mixes color with given colors.
@@ -76,10 +76,10 @@ function sTile(type) constructor{
 		// Getting other tiles colors.
 		// Steps: Check type of the tile, if it`s not our type, get color from tile,
 		// Otherwise, get color from color_hue (Same with tile color but yes).
-		l = l.get_type() != self.type ? color_get_hue(l.get_color()) : color_hue;
-		r = r.get_type() != self.type ? color_get_hue(r.get_color()) : color_hue;
-		d = d.get_type() != self.type ? color_get_hue(d.get_color()) : color_hue;
-		u = u.get_type() != self.type ? color_get_hue(u.get_color()) : color_hue;
+		l = l.get_type() != self._type ? color_get_hue(l.get_color()) : color_hue;
+		r = r.get_type() != self._type ? color_get_hue(r.get_color()) : color_hue;
+		d = d.get_type() != self._type ? color_get_hue(d.get_color()) : color_hue;
+		u = u.get_type() != self._type ? color_get_hue(u.get_color()) : color_hue;
 		
 		// Getting differences.
 		l = abs(l - color_hue);
@@ -92,13 +92,13 @@ function sTile(type) constructor{
 		
 		// Create new color (Mixing, actually).
 		var new_color =make_color_hsv(
-			color_get_hue(self.color) + selected_color, 
-			color_get_saturation(self.color) + selected_color, 
-			color_get_value(self.color) + selected_color
+			color_get_hue(self._color) + selected_color, 
+			color_get_saturation(self._color) + selected_color, 
+			color_get_value(self._color) + selected_color
 		);
 		
 		// Setting.
-		self.color = new_color;
+		self._color = new_color;
 	}
 	self._update_color = function(){
 		// @description [PRIVATE MEMBER] Updates color (Almost like private-setter).
@@ -108,7 +108,7 @@ function sTile(type) constructor{
 		if WORLD_TILE_COLOR_OPTIMIZATION return;
 		
 		// Getting default color from tile colors lookup-table by type.
-		var color = array_get(WORLD_TILE_COLORS, self.type);
+		var color = array_get(WORLD_TILE_COLORS, self._type);
 		
 		// Updating color value.
 		color = make_color_hsv(
@@ -118,7 +118,7 @@ function sTile(type) constructor{
 		);
 		
 		// Setting.
-		self.color = color;
+		self._color = color;
 	}
 	
 	// Sity getters / setter.
@@ -129,14 +129,7 @@ function sTile(type) constructor{
 		// Setting.
 		variable_struct_set(self, "city", city);
 	}
-	self.is_city = function(){
-		// @desrciption Getter for city existance.
-		// @returns {bool} Value.
-		
-		// Returning.
-		return variable_struct_exists(self, "city");
-	}
-	self.get_city = function(){
+	self.try_get_city = function(){
 		// @description Getter for city.
 		// @returns {sCity or undefined}
 		
@@ -164,9 +157,8 @@ function sTile(type) constructor{
 		}
 	}
 
-
 	// Pass given type to type setter.
 	// As there is some setter logic.
 	// (Color updating).
-	self.set_type(self.type);
+	self.set_type(self._type);
 }
