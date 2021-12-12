@@ -25,7 +25,7 @@ function sTile(type) constructor{
 	// When calling `set_type()`.
 	//  If there is tile memory color opitimization enabled, we don`t initalise color value,
 	//  As this setting should reduce memory usage.
-	if not WORLD_TILE_COLOR_OPTIMIZATION self._color = undefined;
+	if (not WORLD_TILE_COLOR_OPTIMIZATION) self._color = undefined;
 	
 	
 	// Type getter / setter.
@@ -52,7 +52,7 @@ function sTile(type) constructor{
 		// @description Getter for color.
 		// @returns {real} Color.
 		
-		if WORLD_TILE_COLOR_OPTIMIZATION{
+		if (WORLD_TILE_COLOR_OPTIMIZATION){
 			// If there is tile memory color optimization enabled.
 			
 			// Returning not a tile color field value,
@@ -105,7 +105,7 @@ function sTile(type) constructor{
 		
 		// Not processing color update,
 		// If there is tile memory color optimization flag in the settings.
-		if WORLD_TILE_COLOR_OPTIMIZATION return;
+		if (WORLD_TILE_COLOR_OPTIMIZATION) return;
 		
 		// Getting default color from tile colors lookup-table by type.
 		var color = array_get(WORLD_TILE_COLORS, self._type);
@@ -149,7 +149,7 @@ function sTile(type) constructor{
 		// Drawing rectangle with world tile size.
 		draw_rectangle(x, y, x + WORLD_TILE_SIZE, y + WORLD_TILE_SIZE, false);
 		
-		if WORLD_TILE_FILTER_CIRCLE{
+		if (WORLD_TILE_FILTER_CIRCLE){
 			// If there is circle filter enabled.
 			
 			// Drawing circle for creating circle-like-filter.

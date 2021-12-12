@@ -12,11 +12,15 @@
 
 function tile_world_pos_to_screen_x(pos_x){
 	// Converting.
+	
+	// Returning.
 	return (pos_x - chunk_x) * WORLD_TILE_SIZE;
 }
 
 function tile_world_pos_to_screen_y(pos_y){ 
 	// Converting.
+	
+	// Returning.
 	return (pos_y - chunk_y) * WORLD_TILE_SIZE;
 }
 
@@ -41,9 +45,9 @@ function set_tile(tile_x, tile_y, tile){
 function world_draw(){
 	// @description Draws world.
 
-	if WORLD_TILES_ENABLED world_draw_tiles();
-	if WORLD_LIGHT_ENABLED world_draw_light();
-	if WORLD_CITIES_ENABLED world_draw_cities();
+	if (WORLD_TILES_ENABLED) world_draw_tiles();
+	if (WORLD_LIGHT_ENABLED) world_draw_light();
+	if (WORLD_CITIES_ENABLED) world_draw_cities();
 }
 
 function world_draw_cities(){ // Function that draws cities.
@@ -66,13 +70,13 @@ function world_draw_cities(){ // Function that draws cities.
 		edges[2] = (edges[2] - chunk_x) * WORLD_TILE_SIZE;
 		edges[3] = (edges[3] - chunk_y) * WORLD_TILE_SIZE;
 		
-		if point_in_rectangle(mouse_x, mouse_y, edges[0], edges[1], edges[2], edges[3]){
+		if (point_in_rectangle(mouse_x, mouse_y, edges[0], edges[1], edges[2], edges[3])){
 			// If hovered.
 			
 			// Setting color.
 			draw_set_color(c_white);
 			
-			if WORLD_DRAW_CITIES_SELECTION{ 
+			if (WORLD_DRAW_CITIES_SELECTION){ 
 				// If selection enabled.
 				
 				// Drawing selection.
@@ -93,11 +97,11 @@ function world_draw_light(){ // Function that draws light.
 	// @function world_draw_light()
 	// @description Function that draws light.
 	
-	if should_redraw_light or not surface_exists(surface_light){
+	if (should_redraw_light or not surface_exists(surface_light)){
 		// If should update.
 		
 		// Creating surface.
-		if not surface_exists(surface_light) surface_light = surface_create(SCREEN_WIDTH, SCREEN_HEIGHT);
+		if (not surface_exists(surface_light)) surface_light = surface_create(SCREEN_WIDTH, SCREEN_HEIGHT);
 		
 		// Setting surface tile target.
 		surface_set_target(surface_light);
@@ -135,7 +139,7 @@ function world_draw_light(){ // Function that draws light.
 		}
 		
 		// Drawing flashlight.
-		if WORLD_DRAW_MOUSE_FLASHLIGHT draw_circle(mouse_x, mouse_y, WORLD_DRAW_MOUSE_FLASHLIGHT, false);
+		if (WORLD_DRAW_MOUSE_FLASHLIGHT) draw_circle(mouse_x, mouse_y, WORLD_DRAW_MOUSE_FLASHLIGHT, false);
 		
 		// Setting draw settings back to normal.
 		draw_set_alpha(1);
@@ -149,21 +153,21 @@ function world_draw_light(){ // Function that draws light.
 	draw_surface(surface_light, 0, 0);
 	
 	// Disabling light update.
-	if not WORLD_FORCE_REDRAW_LIGHT should_redraw_light = false; 
+	if (not WORLD_FORCE_REDRAW_LIGHT) should_redraw_light = false; 
 }
 
 function world_draw_tiles(){ // Function that draw tiles.
 	// @function world_draw_tiles()
 	// @description Function that draw tiles.
 	
-	if should_redraw_tiles or not surface_exists(surface_tiles){
+	if (should_redraw_tiles or not surface_exists(surface_tiles)){
 		// If should update.
 		
 		// Deleting all light sources.
 		light_sources = [];
 		
 		// Creating surface.
-		if not surface_exists(surface_tiles) surface_tiles = surface_create(SCREEN_WIDTH, SCREEN_HEIGHT);
+		if (not surface_exists(surface_tiles)) surface_tiles = surface_create(SCREEN_WIDTH, SCREEN_HEIGHT);
 		
 		// Setting surface tile target.
 		surface_set_target(surface_tiles);
@@ -178,7 +182,7 @@ function world_draw_tiles(){ // Function that draw tiles.
 				// Drawing tile.
 				tile.draw(tile_world_pos_to_screen_x(tile_x), tile_world_pos_to_screen_y(tile_y));
 				
-				if tile.type == eTILE_TYPE.CITY and (WORLD_LIGHT_ENABLED and should_redraw_tiles){ 
+				if (tile.type == eTILE_TYPE.CITY and (WORLD_LIGHT_ENABLED and should_redraw_tiles)){ 
 					// If this is city, light is enabled, and we should be forced to draw tiles.
 					
 					// Add light source.
@@ -195,7 +199,7 @@ function world_draw_tiles(){ // Function that draw tiles.
 	draw_surface(surface_tiles, 0, 0);
 	
 	// Disabling redraw.
-	if not WORLD_FORCE_REDRAW_TILES should_redraw_tiles = false;
+	if (not WORLD_FORCE_REDRAW_TILES) should_redraw_tiles = false;
 }
 
 #endregion
@@ -210,7 +214,7 @@ function world_update_time(){ // Function that updates time.
 	light_level += light_update_direction / 4;
 	
 	// Changing direction if reached max value.
-	if light_level == WORLD_LIGHTHNESS_MAXIMAL or light_level == -WORLD_LIGHTHNESS_MAXIMAL{
+	if (light_level == WORLD_LIGHTHNESS_MAXIMAL or light_level == -WORLD_LIGHTHNESS_MAXIMAL){
 		light_update_direction = -(light_update_direction);
 	}
 }
@@ -228,7 +232,7 @@ function world_update_movement(){ // Function that updates movement.
 	chunk_y = clamp(chunk_y + y_speed, 0, WORLD_HEIGHT - CHUNK_HEIGHT);
 	
 	// Forcing to redraw if moved.
-	if x_speed != 0 or y_speed != 0{
+	if (x_speed != 0 or y_speed != 0){
 		should_redraw_light = true;
 		should_redraw_tiles = true;
 	}
@@ -238,7 +242,7 @@ function world_update_placement(){
 	// @description Updates placement in the world.
 	
 	// Returning if mouse is not pressed.
-	if not mouse_check_button(mb_left) return;
+	if (not mouse_check_button(mb_left)) return;
 	
 	// Getting placement position for grid.
 	var place_x = mouse_x div WORLD_TILE_SIZE + chunk_x;
@@ -256,7 +260,7 @@ function world_update_placement(){
 		var square_y = place_y + place_index div WORLD_PLACEMENT_SIZE - floor(WORLD_PLACEMENT_SIZE / 2);
 			
 		// Passing if overworld.
-		if square_x < 0 or square_x > WORLD_WIDTH or square_y < 0 or square_y > WORLD_HEIGHT continue;
+		if (square_x < 0 or square_x > WORLD_WIDTH or square_y < 0 or square_y > WORLD_HEIGHT) continue;
 			
 		// Getting tile.
 		var square_tile = get_tile(square_x, square_y);
@@ -264,7 +268,7 @@ function world_update_placement(){
 		// Try get city
 		var square_city = square_tile.try_get_city();
 				
-		if not is_undefined(square_city){
+		if (not is_undefined(square_city)){
 			// If there is an city in the placement.
 
 			// Removing this tile from the city structure.
@@ -285,7 +289,7 @@ function world_update_placement(){
 		place_tile.set_type(WORLD_PLACEMENT_TILE);
 		
 		// Passing if overworld.
-		if place_x < 1 or place_x > WORLD_WIDTH - 1 or place_y < 1 or place_y > WORLD_HEIGHT - 1 continue;
+		if (place_x < 1 or place_x > WORLD_WIDTH - 1 or place_y < 1 or place_y > WORLD_HEIGHT - 1) continue;
 			
 		// Mixing.
 		place_tile.mix_color(
@@ -305,9 +309,9 @@ function world_update(){
 	// @description Updates world. 
 	
 	// Updating.
-	if WORLD_UPDATE_TIME world_update_time();
-	if WORLD_ALLOW_MOVEMENT world_update_movement();
-	if WORLD_ALLOW_PLACEMENT world_update_placement();
+	if (WORLD_UPDATE_TIME) world_update_time();
+	if (WORLD_ALLOW_MOVEMENT) world_update_movement();
+	if (WORLD_ALLOW_PLACEMENT) world_update_placement();
 }
 	
 #endregion
@@ -352,9 +356,9 @@ function world_generate(){ // Function that generates world.
 		}
 	
 	// Returning if dont need to mix.
-	if WORLD_TILE_COLOR_OPTIMIZATION or not WORLD_COLOR_MIX return;
+	if (WORLD_TILE_COLOR_OPTIMIZATION or not WORLD_COLOR_MIX) return;
 	
-	for (var world_x = 0; world_x < WORLD_WIDTH; world_x++)
+	for (var world_x = 0; world_x < WORLD_WIDTH; world_x++){
 		for (var world_y = 0; world_y < WORLD_HEIGHT; world_y++){
 			// Iteraing over all world.
 			
@@ -368,7 +372,8 @@ function world_generate(){ // Function that generates world.
 				get_tile(world_x, world_y + 1), 
 				get_tile(world_x, world_y - 1)
 			);
-		};
+		}
+	}
 }
 
 function generator_generate_worm(fill_cell_type, size, worm_x, worm_y, no_overflow){
@@ -381,18 +386,18 @@ function generator_generate_worm(fill_cell_type, size, worm_x, worm_y, no_overfl
 		// Loop for size.
 		
 		// Not set if not on world pos.
-		if worm_x < 0 or worm_y < 0 or worm_x >= WORLD_WIDTH or worm_y >= WORLD_HEIGHT continue;
+		if (worm_x < 0 or worm_y < 0 or worm_x >= WORLD_WIDTH or worm_y >= WORLD_HEIGHT) continue;
 		
 		// Getting tile.
 		var current_tile = get_tile(worm_x, worm_y);
 		
-		if not no_overflow or current_tile.get_type() != fill_cell_type{ 
+		if (not no_overflow or current_tile.get_type() != fill_cell_type){ 
 			// If should place tile.
 			
 			// Setting tile.
 			current_tile.set_type(fill_cell_type); 
 			
-			if not is_undefined(current_city){
+			if (not is_undefined(current_city)){
 				// If any city connected.
 				
 				// Adding tile to the city if needed.
@@ -408,10 +413,10 @@ function generator_generate_worm(fill_cell_type, size, worm_x, worm_y, no_overfl
 		worm_y += irandom_range(-1, 1);
 		
 		// Increasing size if not moved.
-		if worm_x == 0 and worm_y == 0 size++;
+		if (worm_x == 0 and worm_y == 0) size++;
 	}
 	
-	if not is_undefined(current_city){
+	if (not is_undefined(current_city)){
 		// If city is generated.
 		
 		// Calculating edges.
@@ -437,7 +442,7 @@ light_level = WORLD_LIGHTHNESS_MAXIMAL;
 light_update_direction = -1;
 
 // Sources of the light.
-light_sources = []
+light_sources = [];
 
 // Surfaces of the world.
 surface_tiles = surface_create(SCREEN_WIDTH, SCREEN_HEIGHT); // Surface with tiles.

@@ -30,7 +30,7 @@ function sCity() constructor{
 		// @description Calculates edges positions.
 		
 		// If we not set any tiles for now - just return.
-		if is_undefined(self.tiles) return;
+		if (is_undefined(self.tiles)) return;
 		
 		// Gettin position of the first tile.
 		var pos = self.tiles[0]; 
@@ -50,15 +50,15 @@ function sCity() constructor{
 			// Iterating over all positions.
 			
 			// Getting position.
-			var pos = self.tiles[position]
-			var pos_x = pos[0];
-			var pos_y = pos[1];
+			pos = self.tiles[position];
+			pos_x = pos[0];
+			pos_y = pos[1];
 			
 			// Updating edge position if needed.
-			if pos_x < self.edges[0] self.edges[0] = pos_x;
-			if pos_y < self.edges[1] self.edges[1] = pos_y;
-			if pos_x > self.edges[2] self.edges[2] = pos_x;
-			if pos_y > self.edges[3] self.edges[3] = pos_y;
+			if (pos_x < self.edges[0]) self.edges[0] = pos_x;
+			if (pos_y < self.edges[1]) self.edges[1] = pos_y;
+			if (pos_x > self.edges[2]) self.edges[2] = pos_x;
+			if (pos_y > self.edges[3]) self.edges[3] = pos_y;
 		}
 	}
 		
@@ -68,7 +68,7 @@ function sCity() constructor{
 		// @returns {real} Value.
 		
 		// Return NULL (0), as there is no tiles (undefined tiles array).
-		if is_undefined(self._tiles) return 0;
+		if (is_undefined(self._tiles)) return 0;
 		
 		// Returning.
 		return array_length(self.get_edges());
@@ -77,8 +77,10 @@ function sCity() constructor{
 	// Tile setter / getter.
 	self.add_tile = function(add_x, add_y){
 		// @description Adds tile position to the tiles.
+		// @param {real} add_x X of the tile.
+		// @param {real} add_y Y of the tile.
 		
-		if is_undefined(self.tiles){
+		if (is_undefined(self.tiles)){
 			// If array tiles is not initailised.
 			
 			// Initialise edges.
@@ -98,8 +100,8 @@ function sCity() constructor{
 	}
 	self.remove_tile = function(remove_x, remove_y){
 		// @description Function that removes tile from the city.
-		// @param x X of the tile.
-		// @param y Y of the tile.
+		// @param {real} x X of the tile.
+		// @param {real} y Y of the tile.
 
 		// Getting tiles count.
 		var tiles_count = array_length(self.tiles);
@@ -109,8 +111,8 @@ function sCity() constructor{
 			
 			// Getting position.
 			var position = self.tiles[tile_index];
-			
-			if position[0] == remove_x and position[1] == remove_y{
+
+			if (position[0] == remove_x and position[1] == remove_y){
 				// If correct position.
 				
 				// Deleting tile.
